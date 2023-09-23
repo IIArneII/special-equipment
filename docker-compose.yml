@@ -1,0 +1,25 @@
+version: "3.6"
+
+services:
+  special_equipment_postgres:
+    container_name: special_equipment_postgres
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER:  ${SPECIAL_EQUIPMENT_DB_USER:-admin}
+      POSTGRES_PASSWORD: ${SPECIAL_EQUIPMENT_DB_PASSWORD:-password}
+      POSTGRES_DB: ${SPECIAL_EQUIPMENT_DB_DATABASE:-special_equipment}
+    volumes:
+      - ./postgresql_data:/var/lib/postgresql/data
+    ports:
+      - "${SPECIAL_EQUIPMENT_DB_PORT:-5432}:5432"
+  
+  special_equipment_pgadmin:
+    container_name: special_equipment_pgadmin
+    image: dpage/pgadmin4:7
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${SPECIAL_EQUIPMENT_PGADMIN_EMAIL:-admin@email.com}
+      PGADMIN_DEFAULT_PASSWORD: ${SPECIAL_EQUIPMENT_PGADMIN_PASSWORD:-password}
+    ports:
+      - ${SPECIAL_EQUIPMENT_PGADMIN_PORT:-8085}:80
