@@ -22,8 +22,8 @@ if config.config_file_name is not None:
 from app.db.db import Base
 from config import DBConfig
 
-target_metadata = Base
-url = DBConfig.dsn()
+target_metadata = Base.metadata
+url = DBConfig().dsn()
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

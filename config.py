@@ -15,16 +15,15 @@ class APIConfig:
     API_IS_VISIBLE =  bool(strtobool(getenv('API_IS_VISIBLE', default='true')))
 
 class DBConfig:
-    DB_PORT =     int(getenv('DB_PORT',     default=5432))
-    DB_HOST =         getenv('DB_HOST',     default='special_equipment_postgres')
-    DB_NAME =         getenv('DB_NAME',     default='special_equipment')
-    DB_USER =         getenv('DB_USER',     default='admin')
-    DB_PASS =         getenv('DB_PASS',     default='password')
+    DB_PORT =                        int(getenv('DB_PORT',                  default=5432))
+    DB_HOST =                            getenv('DB_HOST',                  default='special_equipment_postgres')
+    DB_NAME =                            getenv('DB_NAME',                  default='special_equipment')
+    DB_USER =                            getenv('DB_USER',                  default='admin')
+    DB_PASS =                            getenv('DB_PASS',                  default='password')
+    DB_APPLY_MIGRATIONS = bool(strtobool(getenv('DB_APPLY_MIGRATIONS',      default='false')))
 
-    def dsn():
-        s = f"postgresql://{DBConfig.DB_USER}:{DBConfig.DB_PASS}@{DBConfig.DB_HOST}:{DBConfig.DB_PORT}/{DBConfig.DB_NAME}"
-        print(s)
-        return s
+    def dsn(self):
+        return f"postgresql://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 class AppConfig:
     APP_SECRET_KEY =                getenv('APP_SECRET_KEY', default='secret_key')
