@@ -10,3 +10,6 @@ class User(SoftDeletedBaseModel):
     email = Column(String, unique=True, nullable=False)
     name = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
+
+    def __repr__(self):
+        return f"User(id={self.id}, username='{self.username}')"

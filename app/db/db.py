@@ -1,42 +1,58 @@
-from contextlib import contextmanager
+from contextlib import contextmanager, AbstractContextManager
+from typing import Callable
 from config import DBConfig
 from loguru import logger
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.session import Session
 
 from alembic import command
 from alembic.config import Config
 
 Base = declarative_base()
-_Session_maker: sessionmaker[Session] = None
 
 import app.db.models.base
 import app.db.models.user
 
 
-def init_db(config: DBConfig):
-    engine = create_engine(config.dsn())
-    Base.metadata.bind = engine
+class DataBase:
+    def __init__(self, config: dict) -> None:
+        self._config = DBConfig(config)
+        self._engine = create_engine(self._config.dsn(), pool_pre_ping=True)
+        self._session_factory = scoped_session(sessionmaker(
+            autocommit=False,
+            autoflush=False,
+            bind=self._engine,
+        ))
 
-    global _Session_maker
-    _Session_maker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        Base.metadata.bind = self._engine
 
+        self.ping()
 
-def apply_migrations(config: DBConfig):
-    alembic_cfg = Config("alembic.ini")
-    configuration = alembic_cfg.get_section(alembic_cfg.config_ini_section, {})
-    configuration["sqlalchemy.url"] = config.dsn()
-    command.upgrade(alembic_cfg, "head")
+        if self._config.APPLY_MIGRATIONS:
+            self._apply_migrations()
 
+    def _apply_migrations(self) -> None:
+        alembic_cfg = Config(self._config.ALEMBIC_INI_PATH)
+        configuration = alembic_cfg.get_section(alembic_cfg.config_ini_section, {})
+        configuration["sqlalchemy.url"] = self._config.dsn()
+        command.upgrade(alembic_cfg, "head")
 
+    def ping(self):
+        with self._engine.connect() as connection: ...
 
-async def get_session() -> Session:
-    session = _Session_maker()
-    try:
-        yield session
-    finally:
-        session.close()
-        logger.info('session close')
+    @contextmanager
+    def get_session(self) -> Callable[..., AbstractContextManager[Session]]:
+        session: Session = self._session_factory()
+        try:
+            yield session
+            session.commit()
+        except Exception:
+            logger.exception(f"Session rollback because of exception")
+            session.rollback()
+            raise
+        finally:
+            session.close()
+            logger.info('Session close')

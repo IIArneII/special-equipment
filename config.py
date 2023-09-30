@@ -1,43 +1,62 @@
-from os import getenv
-from dotenv import load_dotenv
-from  distutils.util import strtobool
+from pydantic_settings import BaseSettings
+from enum import Enum
 
 
-load_dotenv()
+class APIConfig(BaseSettings):
+    VERSION: str =        '0.0.0'
+    TITLE: str =          'Special Equipment API'
+    SUMMARY: str | None = None
+    DESCRIPTION: str =    'Special equipment sales system API'
+    PREFIX: str =         '/api'
+    IS_VISIBLE: bool =    True
 
+    class Config:
+        env_prefix = 'API_'
+        env_file = '.env'
 
-class APIConfig:
-    API_VERSION =     '0.0.0'
-    API_TITLE =       'Special Equipment API'
-    API_SUMMARY =     None
-    API_DESCRIPTION = 'Special equipment sales system API'
-    API_PREFIX =      '/api'
-    API_IS_VISIBLE =  bool(strtobool(getenv('API_IS_VISIBLE', default='true')))
-
-class DBConfig:
-    DB_PORT =                        int(getenv('DB_PORT',                  default=5432))
-    DB_HOST =                            getenv('DB_HOST',                  default='special_equipment_postgres')
-    DB_NAME =                            getenv('DB_NAME',                  default='special_equipment')
-    DB_USER =                            getenv('DB_USER',                  default='admin')
-    DB_PASS =                            getenv('DB_PASS',                  default='password')
-    DB_APPLY_MIGRATIONS = bool(strtobool(getenv('DB_APPLY_MIGRATIONS',      default='false')))
+class DBConfig(BaseSettings):
+    ALEMBIC_INI_PATH: str = 'alembic.ini'
+    PORT: int = 5432
+    HOST: str = 'special_equipment_postgres'
+    NAME: str = 'special_equipment'
+    USER: str = 'admin'
+    PASS: str = 'password'
+    APPLY_MIGRATIONS: bool = False
 
     def dsn(self):
-        return f"postgresql://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"postgresql://{self.USER}:{self.PASS}@{self.HOST}:{self.PORT}/{self.NAME}"
+    
+    class Config:
+        env_prefix = 'DB_'
+        env_file = '.env'
 
-class AppConfig:
-    APP_SECRET_KEY =                getenv('APP_SECRET_KEY', default='secret_key')
-    APP_PORT =                  int(getenv('APP_PORT',       default=80))
-    APP_HOST =                      getenv('APP_HOST',       default='0.0.0.0')
-    APP_DEBUG =      bool(strtobool(getenv('APP_DEBUG',      default='false')))
+class AppConfig(BaseSettings):
+    SECRET_KEY: str = 'secret_key'
+    PORT: int = 80
+    HOST: str = '0.0.0.0'
+    DEBUG: bool = False
 
-class LogConfig:
-    LOG_LEVEL = getenv('LOG_LEVEL', default='info')
-    LOG_DIR =   getenv('LOG_DIR',   default='log')
+    class Config:
+        env_prefix = 'APP_'
+        env_file = '.env'
+
+class LogConfig(BaseSettings):
+    class LogLevelEnum(str, Enum):
+        debug = "debug"
+        info = "info"
+        error = "error"
+
+    LEVEL: LogLevelEnum = LogLevelEnum.info
+    DIR: str = 'logs'
+
+    class Config:
+        env_prefix = 'LOG_'
+        use_enum_values = True
+        env_file = '.env'
 
 
-class Config(object):
-    api_config = APIConfig()
-    db_config = DBConfig()
-    app_config = AppConfig()
-    log_config = LogConfig()
+class Config(BaseSettings):
+    api: APIConfig = APIConfig()
+    db:  DBConfig  = DBConfig()
+    app: AppConfig = AppConfig()
+    log: LogConfig = LogConfig()
