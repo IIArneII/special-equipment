@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.controllers.helpers.responses import INTERNAL_SERVER_ERROR
 from app.controllers.helpers.exception_handlers import not_found_handler, bad_request_handler, internal_server_error_handler
 from app.controllers.users import users_api
+from app.controllers.auth import auth_api
 from app.services.errors import NotFoundError, BadRequestError
 from app.container import Container
 
@@ -52,5 +53,6 @@ def _init_routes(global_api: FastAPI, config: Config):
     api_v1.add_exception_handler(Exception, internal_server_error_handler)
 
     api_v1.include_router(users_api)
+    api_v1.include_router(auth_api)
     
     global_api.mount(f'{config.api.PREFIX}/v1', api_v1)

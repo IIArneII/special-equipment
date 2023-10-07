@@ -5,15 +5,20 @@ from config import Config
 from app.db.db import DataBase
 from app.repositories.users import UsersRepository
 from app.services.users import UsersService
+from app.services.auth import AuthService
 
 
 class Container(DeclarativeContainer):
     config: Config = Configuration()
 
-    wiring_config = WiringConfiguration(modules=['.controllers.helpers.services_providers'])
+    wiring_config = WiringConfiguration(modules=[
+        '.controllers.helpers.services_providers',
+        '.controllers.helpers.profile'
+    ])
 
     db: DataBase = Singleton(DataBase, config=config.db)
     
     users_repository = Factory(UsersRepository, get_session=db.provided.get_session)
 
-    users_service = Factory(UsersService, users_repository=users_repository)
+    users_service: UsersService = Factory(UsersService, users_repository=users_repository)
+    auth_service: AuthService = Factory(AuthService, users_repository=users_repository, auth_config=config.auth)

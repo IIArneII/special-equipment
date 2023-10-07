@@ -55,11 +55,10 @@ class DataBase:
         session: Session = self._session_factory()
         try:
             yield session
-            session.commit()
-        except Exception:
-            logger.exception(f"Session rollback because of exception")
+        except Exception as e:
+            logger.error('Session rollback because of exception')
             session.rollback()
             raise
         finally:
             session.close()
-            logger.info('Session close')
+            logger.debug('Session close')

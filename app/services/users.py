@@ -30,9 +30,7 @@ class UsersService:
         if self._users_repository.get_by_email(model.email) is not None:
             raise BadRequestError('Email already exists')
 
-        new_user = UserEntityCreate.model_validate(model, context={
-            'password_hash': bcrypt.hash(model.password)
-        })
+        new_user = UserEntityCreate(model.model_dump() | {'password_hash': bcrypt.hash(model.password)})
 
         new_user = self._users_repository.create(new_user)
 

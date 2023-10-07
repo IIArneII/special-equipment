@@ -3,12 +3,12 @@ from app.services.models.base import StrEnum
 
 
 class APIConfig(BaseSettings):
-    VERSION: str =        '0.0.0'
-    TITLE: str =          'Special Equipment API'
+    VERSION: str = '0.0.0'
+    TITLE: str = 'Special Equipment API'
     SUMMARY: str | None = None
-    DESCRIPTION: str =    'Special equipment sales system API'
-    PREFIX: str =         '/api'
-    IS_VISIBLE: bool =    True
+    DESCRIPTION: str = 'Special equipment sales system API'
+    PREFIX: str = '/api'
+    IS_VISIBLE: bool = False
 
     class Config:
         env_prefix = 'API_'
@@ -31,7 +31,6 @@ class DBConfig(BaseSettings):
         env_file = '.env'
 
 class AppConfig(BaseSettings):
-    SECRET_KEY: str = 'secret_key'
     PORT: int = 80
     HOST: str = '0.0.0.0'
     DEBUG: bool = False
@@ -57,9 +56,18 @@ class LogConfig(BaseSettings):
         use_enum_values = True
         env_file = '.env'
 
+class AuthConfig(BaseSettings):
+    SECRET_KEY: str = 'secret_key'
+    ACCESS_TOKEN_EXPIRE: int = 3600
+    ALGORITHM: str = 'HS256'
+    class Config:
+        env_prefix = 'AUTH_'
+        env_file = '.env'
+
 
 class Config(BaseSettings):
     api: APIConfig = APIConfig()
     db:  DBConfig  = DBConfig()
     app: AppConfig = AppConfig()
     log: LogConfig = LogConfig()
+    auth: AuthConfig = AuthConfig()
