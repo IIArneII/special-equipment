@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends
-from dependency_injector.wiring import inject, Provide
-from loguru import logger
 
-from app.controllers.utils.responses import OK, NOT_FOUND
+from app.controllers.helpers.responses import OK, NOT_FOUND, BAD_REQUEST
+from app.controllers.helpers.services_providers import users_service
 from app.services.users import UsersService
-from app.container import Container
+from app.services.models.users import UserRegister, UserEntity
 
 
 users_api = APIRouter(
@@ -12,10 +11,12 @@ users_api = APIRouter(
     tags=['users']
 )
 
-@users_api.get("/{id}")
-@inject
-def index(id: int, users_service: Provide[UsersService] = Depends(Provide[Container.users_service])):
-    logger.info(f'{type(users_service)}')
-    
 
-    return '123'
+@users_api.post("/register", responses= OK | BAD_REQUEST)
+def register(model: UserRegister, users_service: UsersService = Depends(users_service)) -> UserEntity:
+    return users_service.register(model)
+
+
+@users_api.get("/{id}", responses= OK | NOT_FOUND)
+def get(id: int, users_service: UsersService = Depends(users_service)) -> UserEntity:
+    return users_service.get(id)

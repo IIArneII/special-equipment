@@ -1,5 +1,5 @@
 from fastapi import status
-from app.controllers.utils.models import Error
+from app.controllers.helpers.models import Error
 
 
 OK = {status.HTTP_200_OK: {'description': 'Success'}}

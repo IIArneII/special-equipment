@@ -1,5 +1,11 @@
-class NotFoundError(Exception):
-    pass
+class ServiceError(Exception):
+    ...
 
-class BadRequestError(Exception):
-    pass
+class NotFoundError(ServiceError):
+    ...
+
+class BadRequestError(ServiceError):
+    ...
+
+
+NOT_FOUND_ERR = NotFoundError('Not found')

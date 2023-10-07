@@ -1,4 +1,5 @@
 from contextlib import contextmanager, AbstractContextManager
+from pydantic import BaseModel
 from typing import Callable
 from config import DBConfig
 from loguru import logger
@@ -11,7 +12,7 @@ from sqlalchemy.orm.session import Session
 from alembic import command
 from alembic.config import Config
 
-Base = declarative_base()
+Base: BaseModel = declarative_base()
 
 import app.db.models.base
 import app.db.models.user
@@ -19,6 +20,8 @@ import app.db.models.user
 
 class DataBase:
     def __init__(self, config: dict) -> None:
+        logger.info(f'Init data base')
+        
         self._config = DBConfig(config)
         self._engine = create_engine(self._config.dsn(), pool_pre_ping=True)
         self._session_factory = scoped_session(sessionmaker(
@@ -35,12 +38,16 @@ class DataBase:
             self._apply_migrations()
 
     def _apply_migrations(self) -> None:
+        logger.info('Apply migrations')
+        
         alembic_cfg = Config(self._config.ALEMBIC_INI_PATH)
         configuration = alembic_cfg.get_section(alembic_cfg.config_ini_section, {})
         configuration["sqlalchemy.url"] = self._config.dsn()
         command.upgrade(alembic_cfg, "head")
 
     def ping(self):
+        logger.info('Ping data base')
+
         with self._engine.connect() as connection: ...
 
     @contextmanager

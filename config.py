@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from enum import Enum
+from app.services.models.base import StrEnum
 
 
 class APIConfig(BaseSettings):
@@ -41,13 +41,16 @@ class AppConfig(BaseSettings):
         env_file = '.env'
 
 class LogConfig(BaseSettings):
-    class LogLevelEnum(str, Enum):
-        debug = "debug"
-        info = "info"
-        error = "error"
+    class LogLevelEnum(StrEnum):
+        debug = 'DEBUG'
+        info = 'INFO'
+        error = 'ERROR'
 
     LEVEL: LogLevelEnum = LogLevelEnum.info
-    DIR: str = 'logs'
+    TO_FILE: bool = True
+    LOG_DIR: str = 'logs'
+    RETENTION: int = 5
+    ROTATION: int = 100
 
     class Config:
         env_prefix = 'LOG_'

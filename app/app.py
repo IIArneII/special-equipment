@@ -1,17 +1,20 @@
-from config import Config
+from config import Config, LogConfig
 from loguru import logger
 from fastapi import FastAPI
 
-from app.controllers.utils.responses import INTERNAL_SERVER_ERROR
-from app.controllers.utils.exception_handlers import not_found_handler, bad_request_handler, internal_server_error_handler
+from app.controllers.helpers.responses import INTERNAL_SERVER_ERROR
+from app.controllers.helpers.exception_handlers import not_found_handler, bad_request_handler, internal_server_error_handler
 from app.controllers.users import users_api
 from app.services.errors import NotFoundError, BadRequestError
 from app.container import Container
 
 
 def create_app(config: Config):
+    _init_logger(config.log)
+
     container = Container()
     container.config.from_dict(config.model_dump())
+    container.db()
 
     global_api = FastAPI(
         debug=config.app.DEBUG,
@@ -23,6 +26,11 @@ def create_app(config: Config):
     _init_routes(global_api, config)
 
     return global_api
+
+
+def _init_logger(config: LogConfig):
+    if config.TO_FILE:
+        logger.add(f'{config.LOG_DIR}/logs.log', compression='zip', rotation=f'{config.ROTATION} MB', retention=config.RETENTION, level=config.LEVEL)
 
 
 def _init_routes(global_api: FastAPI, config: Config):

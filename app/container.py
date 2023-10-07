@@ -10,7 +10,7 @@ from app.services.users import UsersService
 class Container(DeclarativeContainer):
     config: Config = Configuration()
 
-    wiring_config = WiringConfiguration(modules=["app.services.users"])
+    wiring_config = WiringConfiguration(modules=['.controllers.helpers.services_providers'])
 
     db: DataBase = Singleton(DataBase, config=config.db)
     
