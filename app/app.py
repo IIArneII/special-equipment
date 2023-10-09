@@ -1,9 +1,10 @@
 from config import Config, LogConfig
 from loguru import logger
 from fastapi import FastAPI
+from starlette.exceptions import HTTPException
 
 from app.controllers.helpers.responses import INTERNAL_SERVER_ERROR
-from app.controllers.helpers.exception_handlers import not_found_handler, bad_request_handler, internal_server_error_handler
+from app.controllers.helpers.exception_handlers import not_found_handler, bad_request_handler, internal_server_error_handler, http_error_handler
 from app.controllers.users import users_api
 from app.controllers.auth import auth_api
 from app.services.errors import NotFoundError, BadRequestError
@@ -50,6 +51,7 @@ def _init_routes(global_api: FastAPI, config: Config):
 
     api_v1.add_exception_handler(NotFoundError, not_found_handler)
     api_v1.add_exception_handler(BadRequestError, bad_request_handler)
+    api_v1.add_exception_handler(HTTPException, http_error_handler)
     api_v1.add_exception_handler(Exception, internal_server_error_handler)
 
     api_v1.include_router(users_api)

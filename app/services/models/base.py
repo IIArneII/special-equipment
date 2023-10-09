@@ -1,18 +1,7 @@
 from pydantic import BaseModel as PydanticBaseModel, Field
 from datetime import datetime
-from enum import Enum
 from fastapi import Query
 from humps import camelize
-
-
-class StrEnum(str, Enum):
-    @classmethod
-    def _missing_(cls, value):
-        value = value.upper()
-        for member in cls:
-            if member.upper() == value:
-                return member
-        return None
 
 
 class BaseModel(PydanticBaseModel):
@@ -20,6 +9,7 @@ class BaseModel(PydanticBaseModel):
         alias_generator = camelize
         populate_by_name = True
         from_attributes = True
+        use_enum_values = True
 
 
 class EntityBaseModel(BaseModel):

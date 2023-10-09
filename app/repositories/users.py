@@ -1,5 +1,5 @@
 from app.db.models.user import User
-from app.services.models.users import UserEntity, UserEntityCreate
+from app.services.models.users import UserEntity, UserEntityCreate, UserEntityWithPassword
 
 
 from sqlalchemy.orm.session import Session
@@ -18,6 +18,16 @@ class UsersRepository:
             ).first()
 
             return UserEntity.model_validate(user) if user else None
+    
+
+    def get_by_username_with_password(self, username: str) -> UserEntityWithPassword | None:
+        with self._get_session() as session:
+            user = session.query(User).filter(
+                User.username == username and
+                User.deleted_at is None
+            ).first()
+        
+            return UserEntityWithPassword.model_validate(user) if user else None
 
 
     def get_by_username(self, username: str) -> UserEntity | None:

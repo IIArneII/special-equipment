@@ -1,18 +1,25 @@
-from app.services.models.base import BaseModel, EntityBaseModel, Page, Filter
+from app.services.models.base import BaseModel, EntityBaseModel
+from app.services.enums.users import Role
+
 from pydantic import Field, EmailStr
-from fastapi import Depends
 
 
 class UserEntity(EntityBaseModel):
     username: str
     email: EmailStr
     name: str
+    role: Role
+
+
+class UserEntityWithPassword(UserEntity):
+    password_hash: str
 
 
 class UserEntityCreate(BaseModel):
     username: str
     email: EmailStr
     name: str
+    role: Role
     password_hash: str
 
 
@@ -27,7 +34,3 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
-
-
-class Profile(BaseModel):
-    id: int = Field(ge=1)

@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from app.services.models.base import StrEnum
+from app.services.enums.base import StrEnum
 
 
 class APIConfig(BaseSettings):
@@ -21,7 +21,7 @@ class DBConfig(BaseSettings):
     NAME: str = 'special_equipment'
     USER: str = 'admin'
     PASS: str = 'password'
-    APPLY_MIGRATIONS: bool = False
+    APPLY_MIGRATIONS: bool = True
 
     def dsn(self):
         return f"postgresql://{self.USER}:{self.PASS}@{self.HOST}:{self.PORT}/{self.NAME}"

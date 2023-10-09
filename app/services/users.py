@@ -3,7 +3,7 @@ from passlib.hash import bcrypt
 from app.services.errors import BadRequestError, NOT_FOUND_ERR
 from app.repositories.users import UsersRepository
 from app.services.helpers.try_except import try_except
-from app.services.models.users import UserEntityCreate, UserRegister, UserEntity
+from app.services.models.users import UserEntityCreate, UserRegister, UserEntity, Role
 
 
 class UsersService:
@@ -30,7 +30,10 @@ class UsersService:
         if self._users_repository.get_by_email(model.email) is not None:
             raise BadRequestError('Email already exists')
 
-        new_user = UserEntityCreate(model.model_dump() | {'password_hash': bcrypt.hash(model.password)})
+        new_user = UserEntityCreate(model.model_dump() | {
+            'password_hash': bcrypt.hash(model.password),
+            'role': Role.client,
+        })
 
         new_user = self._users_repository.create(new_user)
 

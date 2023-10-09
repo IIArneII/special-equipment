@@ -1,36 +1,43 @@
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from dependency_injector.wiring import inject, Provide
 from jose import JWTError, jwt
-from loguru import logger
 
-from app.services.models.users import Profile
+from app.controllers.helpers.exceptions import CREDENTIALS_ERR, FORBIDDEN_ERR
+from app.services.enums.users import Role
+from app.services.models.users import UserEntity
+from app.services.errors import NotFoundError
+from app.services.users import UsersService
 from app.container import Container
-from config import AuthConfig
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
 
 @inject
-def get_user(token: str = Depends(oauth2_scheme), config: dict = Depends(Provide[Container.config.auth])) -> Profile:
+def get_user(
+    token: str = Depends(oauth2_scheme),
+    config: dict = Depends(Provide[Container.config.auth]),
+    user_service: UsersService = Depends(Provide[Container.users_service])
+    ) -> UserEntity:
     try:
-        logger.info(type(token))
-        logger.info(config)
-        config:AuthConfig = AuthConfig(config)
-        payload = jwt.decode(token, config.SECRET_KEY, algorithms=config.ALGORITHM)
-        return Profile(id=payload['sub'])
+        payload = jwt.decode(token, config['SECRET_KEY'], algorithms=config['ALGORITHM'])
+        
+        if (id := payload.get('sub')) is None:
+            raise CREDENTIALS_ERR
+
+        return user_service.get(int(id))
     
-    except JWTError as e:
-        logger.info(e)
-        raise credentials_exception
+    except (JWTError, NotFoundError) as e:
+        raise CREDENTIALS_ERR
 
 
-def profile(profile: Profile = Depends(get_user)) -> Profile:
-    return profile
+class Profile:
+    def __init__(self, roles: list[Role] = []) -> None:
+        self.roles = roles
+
+    def __call__(self, profile: UserEntity = Depends(get_user)) -> UserEntity:
+        if self.roles and profile.role not in self.roles:
+            raise FORBIDDEN_ERR
+        
+        return profile
