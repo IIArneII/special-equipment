@@ -29,8 +29,3 @@ class UserRegister(BaseModel):
     name: str
     password: str = Field(min_length=8)
     password_repeat: str = Field(min_length=8)
-
-
-class UserLogin(BaseModel):
-    username: str
-    password: str

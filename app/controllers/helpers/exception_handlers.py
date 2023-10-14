@@ -2,8 +2,8 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
-from app.controllers.helpers.models import Error
-from app.services.errors import NotFoundError, BadRequestError
+from app.controllers.models.error import Error
+from app.services.models.errors import NotFoundError, BadRequestError
 
 def not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
     return JSONResponse(

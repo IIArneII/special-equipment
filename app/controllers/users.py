@@ -16,14 +16,23 @@ users_api = APIRouter(
 
 @users_api.post("/register", responses= OK | BAD_REQUEST)
 def register(model: UserRegister, users_service: UsersService = Depends(users_service)) -> UserEntity:
+    """
+    Register of a new client
+    """
     return users_service.register(model)
 
 
 @users_api.get("/me", responses= OK)
-def get(profile: UserEntity = Depends(Profile([Role.client])), users_service: UsersService = Depends(users_service)) -> UserEntity:
+def get_me(profile: UserEntity = Depends(Profile()), users_service: UsersService = Depends(users_service)) -> UserEntity:
+    """
+    Get yourself
+    """
     return users_service.get(profile.id)
 
 
 @users_api.get("/{id}", responses= OK | NOT_FOUND)
 def get(id: int, users_service: UsersService = Depends(users_service)) -> UserEntity:
+    """
+    Get user by ID
+    """
     return users_service.get(id)

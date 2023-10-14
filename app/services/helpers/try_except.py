@@ -1,7 +1,7 @@
 from loguru import logger
 import traceback
 
-from app.services.errors import ServiceError
+from app.services.models.errors import ServiceError
 
 
 def _get_line(e: Exception):

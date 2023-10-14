@@ -40,12 +40,12 @@ class AppConfig(BaseSettings):
         env_file = '.env'
 
 class LogConfig(BaseSettings):
-    class LogLevelEnum(StrEnum):
+    class LogLevel(StrEnum):
         debug = 'DEBUG'
         info = 'INFO'
         error = 'ERROR'
 
-    LEVEL: LogLevelEnum = LogLevelEnum.info
+    LEVEL: LogLevel = LogLevel.info
     TO_FILE: bool = True
     LOG_DIR: str = 'logs'
     RETENTION: int = 5
@@ -59,6 +59,7 @@ class LogConfig(BaseSettings):
 class AuthConfig(BaseSettings):
     SECRET_KEY: str = 'secret_key'
     ACCESS_TOKEN_EXPIRE: int = 3600
+    REFRESH_TOKEN_EXPIRE: int = 86400
     ALGORITHM: str = 'HS256'
     class Config:
         env_prefix = 'AUTH_'

@@ -1,6 +1,6 @@
 from passlib.hash import bcrypt
 
-from app.services.errors import BadRequestError, NOT_FOUND_ERR
+from app.services.models.errors import BadRequestError, NOT_FOUND_ERR
 from app.repositories.users import UsersRepository
 from app.services.helpers.try_except import try_except
 from app.services.models.users import UserEntityCreate, UserRegister, UserEntity, Role
