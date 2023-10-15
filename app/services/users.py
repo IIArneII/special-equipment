@@ -3,7 +3,8 @@ from passlib.hash import bcrypt
 from app.services.models.errors import BadRequestError, NOT_FOUND_ERR
 from app.repositories.users import UsersRepository
 from app.services.helpers.try_except import try_except
-from app.services.models.users import UserEntityCreate, UserRegister, UserEntity, Role
+from app.services.models.users import UserEntityCreate, UserRegister, UserEntity, Role, UserFilter
+from app.services.models.base import Page
 
 
 class UsersService:
@@ -18,6 +19,12 @@ class UsersService:
             raise NOT_FOUND_ERR
 
         return user
+    
+    @try_except
+    def get_list(self, filter: UserFilter) -> Page[UserEntity]:
+        users = self._users_repository.get_list(filter)
+
+        return users
     
     @try_except
     def register(self, model: UserRegister) -> UserEntity:

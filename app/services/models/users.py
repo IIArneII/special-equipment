@@ -1,4 +1,4 @@
-from app.services.models.base import BaseModel, EntityBaseModel
+from app.services.models.base import BaseModel, EntityBaseModel, BaseFilter, Page
 from app.services.enums.users import Role
 
 from pydantic import Field, EmailStr
@@ -9,6 +9,11 @@ class UserEntity(EntityBaseModel):
     email: EmailStr
     name: str
     role: Role
+
+
+class UserFilter(BaseFilter):
+    username: str | None = None
+    email: str | None = None
 
 
 class UserEntityWithPassword(UserEntity):

@@ -98,13 +98,14 @@ def _build_openapi(api: FastAPI):
 def _fix_openapi(api: FastAPI, schema: dict) -> dict:
         schema_json: str = dumps(schema)
 
-        models_tytles = set(findall('Body_[\w]*"', schema_json))
         routes = list(filter(lambda x: isinstance(x, APIRoute), api.routes))
 
+        models_tytles = set(findall('Body_[\w]*"', schema_json))
         for t in models_tytles:
             r: APIRoute = list(filter(lambda x: x.unique_id == t[5:-1:], routes))
             if not r:
                 break
+            
             r = r[0]
 
             endpoint_parameters = get_typed_signature(r.endpoint).parameters
@@ -118,9 +119,26 @@ def _fix_openapi(api: FastAPI, schema: dict) -> dict:
 
             schema_json = schema_json.replace(t, f'{annotation.__name__}"')
         
+        models_tytles = set(findall('Page_[\w]*"', schema_json))
+        for t in models_tytles:
+            r: list[str] = t.split('_')
+            logger.info(r)
+            r = list(filter(bool, r))
+
+            logger.info(r)
+            if len(r) < 3:
+                break
+
+            schema_json = schema_json.replace(t, f'{r[1]}{r[0]}"')
+
+        
         models_tytles = set(findall('Body_[\w]*"', schema_json))
         if models_tytles:
             logger.warning(f'Uncorrected fields "Body_" detected: {", ".join([t[:-1] for t in models_tytles])}')
+        
+        models_tytles = set(findall('Page_[\w]*"', schema_json))
+        if models_tytles:
+            logger.warning(f'Uncorrected fields "Page_" detected: {", ".join([t[:-1] for t in models_tytles])}')
         
         openapi_schema = loads(schema_json)
 

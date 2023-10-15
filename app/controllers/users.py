@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
-from app.controllers.helpers.responses import OK, NOT_FOUND, BAD_REQUEST
+from app.controllers.helpers.responses import OK, NOT_FOUND, BAD_REQUEST, FORBIDDEN
 from app.controllers.helpers.services_providers import users_service
 from app.controllers.helpers.profile import Profile
+from app.controllers.helpers.filters import user_filter
 from app.services.users import UsersService
-from app.services.enums.users import Role
-from app.services.models.users import UserRegister, UserEntity
+from app.services.models.users import UserRegister, UserEntity, UserFilter
+from app.services.models.base import Page, BaseFilter
 
 
 users_api = APIRouter(
@@ -14,25 +15,33 @@ users_api = APIRouter(
 )
 
 
-@users_api.post("/register", responses= OK | BAD_REQUEST)
+@users_api.post('/register', responses= OK | BAD_REQUEST)
 def register(model: UserRegister, users_service: UsersService = Depends(users_service)) -> UserEntity:
-    """
+    '''
     Register of a new client
-    """
+    '''
     return users_service.register(model)
 
 
-@users_api.get("/me", responses= OK)
+@users_api.get('/me', responses= OK | FORBIDDEN)
 def get_me(profile: UserEntity = Depends(Profile()), users_service: UsersService = Depends(users_service)) -> UserEntity:
-    """
+    '''
     Get yourself
-    """
+    '''
     return users_service.get(profile.id)
 
 
-@users_api.get("/{id}", responses= OK | NOT_FOUND)
+@users_api.get("", responses= OK)
+def get_list(filter: UserFilter = Depends(user_filter), users_service: UsersService = Depends(users_service)) -> Page[UserEntity]:
+    '''
+    Get users list
+    '''    
+    return users_service.get_list(filter)
+
+
+@users_api.get('/{id}', responses= OK | NOT_FOUND)
 def get(id: int, users_service: UsersService = Depends(users_service)) -> UserEntity:
-    """
+    '''
     Get user by ID
-    """
+    '''
     return users_service.get(id)
